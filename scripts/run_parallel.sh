@@ -94,9 +94,7 @@ fi
 # Build command arguments
 ARGS="--tasks_folder $TASKS_FOLDER --tag $TAG --model_short_name $MODEL_NAME --provider $MODEL_PROVIDER --maxstep $MAX_STEPS --workers $WORKERS --timeout $TIMEOUT --dump_path $DUMP_PATH --eval_config $CONFIG_FILE --image_name $IMAGE_NAME --runner $RUNNER"
 
-if [ "$RUNNER" = "decoupled" ]; then
-    ARGS="$ARGS --runmode $RUNMODE"
-fi
+ARGS="$ARGS --runmode $RUNMODE"
 
 if [ ! -z "$AGENT_FRAMEWORK" ]; then
     ARGS="$ARGS --agent_framework $AGENT_FRAMEWORK"
@@ -117,9 +115,7 @@ echo "📁 Dump path: $DUMP_PATH"
 echo "🐳 Docker image: $IMAGE_NAME"
 echo "⚙️  Config file: $CONFIG_FILE"
 echo "🏃 Runner: $RUNNER"
-if [ "$RUNNER" = "decoupled" ]; then
-    echo "🎛️  Run mode: $RUNMODE"
-fi
+echo "🎛️  Run mode: $RUNMODE"
 if [ ! -z "$AGENT_FRAMEWORK" ]; then
     echo "🧩 Agent framework: $AGENT_FRAMEWORK"
 fi

@@ -28,7 +28,11 @@ configs/snowflake_rsa_key.p8
 configs/snowflake_rsa_key.pub
 configs/.mcp-auth/
 
-deployment/k8s/
+deployment/k8s/*
+!deployment/k8s/kind-config.yaml
+!deployment/k8s/scripts/
+deployment/k8s/scripts/*
+!deployment/k8s/scripts/setup.sh
 ruige
 ruige*
 dumps*
@@ -59,6 +63,7 @@ deployment/*/*
 !deployment/utils/**
 !deployment/*/scripts/
 !deployment/*/scripts/**
+!deployment/k8s/kind-config.yaml
 deployment/*/scripts/__pycache__/
 
 wandb

@@ -1,0 +1,19 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+# The host Docker daemon is currently running with the cgroupfs cgroup driver.
+# Without this override, kind's node image defaults to systemd cgroups and
+# kubelet/containerd/runc disagree on the cgroup layout, causing the control
+# plane static Pods to fail with:
+#   "expected cgroupsPath to be of format slice:prefix:name for systemd cgroups"
+# Keeping kubelet and the CRI runtime on cgroupfs avoids that mismatch.
+kubeadmConfigPatches:
+  - |
+    kind: KubeletConfiguration
+    apiVersion: kubelet.config.k8s.io/v1beta1
+    cgroupDriver: cgroupfs
+containerdConfigPatches:
+  - |
+    [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc]
+      cgroup = "cgroupfs"
+    [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
+      SystemdCgroup = false

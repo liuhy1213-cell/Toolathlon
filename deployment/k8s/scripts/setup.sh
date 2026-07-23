@@ -2,6 +2,7 @@
 
 # Set variables
 k8sconfig_path_dir=deployment/k8s/configs
+kind_config_path="deployment/k8s/kind-config.yaml"
 
 # Read instance_suffix from ports_config.yaml
 instance_suffix=$(uv run python -c "
@@ -140,8 +141,13 @@ create_cluster() {
     "$podman_or_docker" rm -f "$node_name" >/dev/null 2>&1 || true
     "$podman_or_docker" network disconnect -f kind "$node_name" >/dev/null 2>&1 || true
 
-    # Use podman/docker as the provider when creating the cluster
-    if KIND_EXPERIMENTAL_PROVIDER=$podman_or_docker kind create cluster --name "$cluster_name" --kubeconfig "$config_path"; then
+    # Use podman/docker as the provider when creating the cluster.
+    # Pass the shared kind config so kubelet/containerd use the same cgroup
+    # driver as the host container runtime (cgroupfs in this environment).
+    if KIND_EXPERIMENTAL_PROVIDER=$podman_or_docker kind create cluster \
+        --name "$cluster_name" \
+        --config "$kind_config_path" \
+        --kubeconfig "$config_path"; then
         log_info "Cluster $cluster_name created successfully"
         return 0
     else

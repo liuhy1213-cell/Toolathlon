@@ -145,7 +145,91 @@ docker ps --format 'table {{.Names}}\t{{.Status}}'
 
 ---
 
-## 5. 运行安装检查（可选）
+## 5. Google 凭证申请与配置（完整模式需要）
+
+`normal` 模式下，容器启动脚本会强制把 Google OAuth 凭证复制到 `~/.gmail-mcp/` 和 `~/.calendar-mcp/`。如果不需要 Gmail/Calendar MCP，直接用第 6 节的 `quickstart` 模式跳过即可。
+
+### 5.1 准备工作
+
+1. 注册一个**新的 Google/Gmail 账号**（建议专门用于 Toolathlon，避免影响主账号）。
+2. 访问 [Google Cloud Console](https://console.cloud.google.com/)，登录该账号并接受服务条款。
+3. （可选）安装 `gcloud` SDK：
+
+```bash
+curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-456.0.0-linux-x86_64.tar.gz
+tar -xf google-cloud-sdk-*-x86_64.tar.gz
+./google-cloud-sdk/install.sh
+source ~/.bashrc
+```
+
+### 5.2 创建 OAuth 2.0 客户端
+
+1. 进入 [Google Cloud Console](https://console.cloud.google.com/)，创建一个新项目（Project）。
+2. 左侧菜单 → **APIs & Services** → **OAuth consent screen**。
+3. 选择 **External**，填写应用名称、用户支持邮箱、开发者联系邮箱，保存。
+4. 点击 **Publish App**（发布应用）。
+5. 左侧菜单 → **Credentials** → **Create Credentials** → **OAuth client ID**。
+6. Application type 选择 **Web application**。
+7. 名称随便填，例如 `toolathlon`。
+8. Authorized redirect URIs 添加：
+   ```text
+   http://localhost:3000/oauth2callback
+   ```
+9. 点击 **Create**，然后 **Download JSON**。
+10. 把下载的 JSON 文件重命名为 `gcp-oauth.keys.json`，放到 `configs/` 目录：
+
+```bash
+mv /path/to/downloaded-client-secret.json /home/Toolathlon/configs/gcp-oauth.keys.json
+```
+
+### 5.3 生成 `google_credentials.json`
+
+有了 `gcp-oauth.keys.json` 后，运行自动化脚本完成授权并生成包含 `refresh_token` 的完整凭证：
+
+```bash
+cd /home/Toolathlon
+bash global_preparation/automated_google_setup.sh
+```
+
+脚本会：
+- 创建/选择 GCP 项目
+- 启用 Gmail/Calendar API
+- 引导你完成 OAuth 授权（会给出 URL，用浏览器打开授权）
+- 最终生成 `configs/google_credentials.json`
+
+如果自动化脚本卡住，也可以分步做：
+
+```bash
+# 1. 手动启用 API
+# 在 Cloud Console 里搜索并启用：Gmail API、Google Calendar API
+
+# 2. 生成 credentials.json
+uv run python global_preparation/create_google_credentials.py
+# 或
+uv run python global_preparation/simple_google_auth.py
+```
+
+### 5.4 验证凭证
+
+```bash
+ls -la /home/Toolathlon/configs/gcp-oauth.keys.json
+ls -la /home/Toolathlon/configs/google_credentials.json
+
+# 简单检查格式
+python3 -c "import json; print(json.load(open('configs/google_credentials.json')).keys())"
+```
+
+应看到类似 `dict_keys(['client_id', 'client_secret', 'refresh_token', ...])`。
+
+### 5.5 费用说明
+
+- 创建 GCP 项目和 OAuth 客户端：**免费**
+- Gmail API / Calendar API：有免费额度，评估用量通常足够
+- **建议不绑定 billing account（信用卡）**，超出免费额度只会被限制，不会扣费
+
+---
+
+## 6. 运行安装检查（可选）
 
 如果不需要 Gmail/Calendar MCP，用 `quickstart` 模式：
 
@@ -153,25 +237,15 @@ docker ps --format 'table {{.Names}}\t{{.Status}}'
 bash global_preparation/check_installation_containerized.sh lockon0927/toolathlon-task-image:1016beta quickstart
 ```
 
-如果需要完整功能，先生成 Google 凭证：
-
-```bash
-bash global_preparation/automated_google_setup.sh
-# 或
-uv run python global_preparation/create_google_credentials.py
-```
-
-然后再跑：
+如果已经按第 5 节配置好 Google 凭证，跑完整模式：
 
 ```bash
 bash global_preparation/check_installation_containerized.sh
 ```
 
-> Google OAuth 客户端本身免费，Gmail/Calendar API 也有免费额度。建议不绑定 billing account，超出额度只会被限制不会扣费。
-
 ---
 
-## 6. 运行模型评估
+## 7. 运行模型评估
 
 ### 6.1 设置模型 API（unified provider 示例）
 

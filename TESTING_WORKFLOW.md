@@ -1,6 +1,6 @@
-# Toolathlon 完整测试流程（以本机环境为例）
+# Toolathlon 完整测试流程
 
-本文档记录在本机（Huawei Cloud EulerOS 2.0）上从零跑通 Toolathlon 评估的完整步骤，包括环境踩坑和修复。其他人拿到类似环境可以直接照着跑。
+本文档记录在119.13.79.178（Huawei Cloud EulerOS 2.0）上从零跑通 Toolathlon 评估的完整步骤，包括环境踩坑和修复。
 
 > **环境快照（2026-07-23）**
 > - OS: Huawei Cloud EulerOS 2.0 (x86_64)
@@ -8,8 +8,6 @@
 > - Docker: 26.1.4
 > - kind: v0.20.0
 > - kubectl: 已安装
-> - Node image: `kindest/node:v1.27.3`
-> - Task image: `lockon0927/toolathlon-task-image:1016beta`
 
 ---
 
@@ -84,20 +82,6 @@ bash global_preparation/pull_toolathlon_image.sh
 
 这会拉取默认任务镜像 `lockon0927/toolathlon-task-image:1016beta`。
 
-### 1.6 安装 kind 和 kubectl
-
-```bash
-# kind
-kind version
-# 如果未安装：
-# curl -Lo /tmp/kind https://kind.sigs.k8s.io/dl/v0.20.0/kind-linux-amd64
-# chmod +x /tmp/kind
-# mv /tmp/kind /usr/local/bin/kind
-
-# kubectl
-kubectl version --client
-# 如果未安装，参考：https://kubernetes.io/docs/tasks/tools/
-```
 
 ---
 
